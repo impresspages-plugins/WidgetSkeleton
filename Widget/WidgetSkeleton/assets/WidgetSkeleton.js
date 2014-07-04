@@ -1,24 +1,25 @@
 /**
- * @package ImpressPages
+ * Widget initialization and management script
+ * If you rename the widget, replace WidgetSkeleton instance to the new name
  *
  */
 
 var IpWidget_WidgetSkeleton = function () {
 
     this.widgetObject = null;
-    this.confirmButton = null;
-    this.data = {};
+    this.widgetOverlay = null;
 
+    /**
+     * Initialize widget management
+     * @param widgetObject jquery object of an widget div
+     * @param data widget's data
+     */
     this.init = function (widgetObject, data) {
-
+        //store widgetObject variable to be accessible from other functions
         this.widgetObject = widgetObject;
-        this.data = data;
+        this.widgetObject.css('min-height', '30px'); //if widget is empty it could be impossible to click on.
 
-        this.widgetObject.css('min-height', '30px');
-
-
-        var context = this; // set this so $.proxy would work below
-
+        var context = this; // set this so $.proxy would work below. http://api.jquery.com/jquery.proxy/
 
         //put an overlay over the widget and open popup on mouse click event
         this.$widgetOverlay = $('<div></div>');
@@ -36,7 +37,9 @@ var IpWidget_WidgetSkeleton = function () {
 
     };
 
-
+    /**
+     * Make the overlay div to cover the whole widget.
+     */
     var fixOverlay = function () {
         this.$widgetOverlay
             .css('position', 'absolute')
@@ -53,11 +56,14 @@ var IpWidget_WidgetSkeleton = function () {
         $.proxy(openPopup, this)();
     };
 
+    /**
+     * Open widget management popup
+     */
     var openPopup = function () {
-        var context = this;
-        $('#ipWidgetSkeletonPopup').remove(); //remove any existing popup.
+        var context = this; // store current context for $.proxy bellow. http://api.jquery.com/jquery.proxy/
+        $('#ipWidgetSkeletonPopup').remove(); //remove any existing popup. This could happen if other widget is in management state right now.
 
-        //get popup HTML using AJAX
+        //get popup HTML using AJAX. See AdminController.php widgetPopupHtml function
         var data = {
             aa: 'WidgetSkeleton.widgetPopupHtml',
             securityToken: ip.securityToken,
@@ -75,9 +81,9 @@ var IpWidget_WidgetSkeleton = function () {
                 $('body').append($popupHtml);
                 var $popup = $('#ipWidgetSkeletonPopup .ipsModal');
                 $popup.modal();
-                ipInitForms();
-                $popup.find('.ipsConfirm').on('click', function(e){e.preventDefault(); $popup.find('form').submit();});
-                $popup.find('form').on('ipSubmitResponse', $.proxy(save, context));
+                ipInitForms(); //This is standard ImpressPages function to initialize JS specific form fields
+                $popup.find('.ipsConfirm').on('click', function(e){e.preventDefault(); $popup.find('form').submit();}); //submit form on "Confirm" button click
+                $popup.find('form').on('ipSubmitResponse', $.proxy(save, context)); //save form data if form has been successfully validated by PHP (AdminController.php -> checkForm)
             },
             error: function (response) {
                 alert('Error: ' + response.responseText);
@@ -89,10 +95,15 @@ var IpWidget_WidgetSkeleton = function () {
 
     };
 
+    /**
+     * Permanently store widget's data and destroy the popup
+     * @param e
+     * @param response
+     */
     var save = function (e, response) {
         this.widgetObject.save(response.data, 1); // save and reload widget
         var $popup = $('#ipWidgetSkeletonPopup .ipsModal');
-        $popup.remove();
+        $popup.modal('hide');
     };
 
 };

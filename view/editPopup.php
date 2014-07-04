@@ -1,3 +1,10 @@
+<?php
+/**
+ * This is an HTML of widget management pupup. Please look at AdminController.php to see how $form variable is created.
+ * Feel free to modify this file, but leave intact ID attributes and classes with 'ips' prefix.
+ *
+ */
+?>
 <div class="ip" id="ipWidgetSkeletonPopup">
     <div class="modal fade ipsModal">
         <div class="modal-dialog">
