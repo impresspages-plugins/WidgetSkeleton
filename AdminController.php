@@ -18,7 +18,7 @@ class AdminController
 {
 
     /**
-     * 
+     * WidgetSkeleton.js ask to provide widget management popup HTML. This controller does this.
      * @return \Ip\Response\Json
      * @throws \Ip\Exception\View
      */
@@ -28,6 +28,7 @@ class AdminController
         $widgetRecord = \Ip\Internal\Content\Model::getWidgetRecord($widgetId);
         $widgetData = $widgetRecord['data'];
 
+        //create form prepopulated with current widget data
         $form = $this->managementForm($widgetData);
 
         //Render form and popup HTML
@@ -44,14 +45,14 @@ class AdminController
 
 
     /**
-     * Check widget's posted data and return data to be stored
+     * Check widget's posted data and return data to be stored or errors to be displayed
      */
     public function checkForm()
     {
         $data = ipRequest()->getPost();
         $form = $this->managementForm();
         $data = $form->filterValues($data); //filter post data to remove any non form specific items
-        $errors = $form->validate($data);
+        $errors = $form->validate($data); //http://www.impresspages.org/docs/form-validation-in-php-3
         if ($errors) {
             //error
             $data = array (
@@ -107,6 +108,8 @@ class AdminController
             )
         );
         $form->addField($field);
+
+        //ADD YOUR OWN FIELDS
 
         return $form;
     }
