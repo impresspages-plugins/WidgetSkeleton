@@ -1,0 +1,7 @@
+{
+    "title": "Widget skeleton",
+    "version": "1.00",
+    "name": "WidgetSkeleton",
+    "description": "Skeleton plugin to build your own widgets on top of it. Just add required form fields and modify widget's skin to get your own unique widget.",
+    "author": "ImpressPages"
+}
