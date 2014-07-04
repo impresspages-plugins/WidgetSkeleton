@@ -17,6 +17,11 @@ namespace Plugin\WidgetSkeleton;
 class AdminController
 {
 
+    /**
+     * 
+     * @return \Ip\Response\Json
+     * @throws \Ip\Exception\View
+     */
     public function widgetPopupHtml()
     {
         $widgetId = ipRequest()->getQuery('widgetId');
