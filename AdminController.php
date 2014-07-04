@@ -100,7 +100,7 @@ class AdminController
         $field->addValidator('Required');
         $form->addField($field);
 
-        $field = new \Ip\Form\Field\Textarea(
+        $field = new \Ip\Form\Field\RichText(
             array(
                 'name' => 'text',
                 'label' => 'Text',
