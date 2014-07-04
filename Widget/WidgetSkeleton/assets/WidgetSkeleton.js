@@ -20,7 +20,7 @@ var IpWidget_WidgetSkeleton = function () {
         var context = this; // set this so $.proxy would work below
 
 
-        //put an overlay over the widget and open popup on mouse clic event
+        //put an overlay over the widget and open popup on mouse click event
         this.$widgetOverlay = $('<div></div>');
         this.widgetObject.prepend(this.$widgetOverlay);
         this.$widgetOverlay.on('click', $.proxy(openPopup, this));
@@ -59,7 +59,7 @@ var IpWidget_WidgetSkeleton = function () {
 
         //get popup HTML using AJAX
         var data = {
-            aa: 'WidgetSkeleton.widgetPopupForm',
+            aa: 'WidgetSkeleton.widgetPopupHtml',
             securityToken: ip.securityToken,
             widgetId: this.widgetObject.data('widgetid')
         }
@@ -77,7 +77,7 @@ var IpWidget_WidgetSkeleton = function () {
                 $popup.modal();
                 ipInitForms();
                 $popup.find('.ipsConfirm').on('click', function(e){e.preventDefault(); $popup.find('form').submit();});
-                $popup.find('form').off('submit').on('submit', $.proxy(save, context));
+                $popup.find('form').on('ipSubmitResponse', $.proxy(save, context));
             },
             error: function (response) {
                 alert('Error: ' + response.responseText);
@@ -89,30 +89,10 @@ var IpWidget_WidgetSkeleton = function () {
 
     };
 
-    var save = function () {
-
-
-        var formData = $('#ipWidgetSkeletonPopup form').serializeArray();
-        var data = {};
-        $.each(formData, function(key, value) {
-            if ($.inArray(value.name, ['securityToken', 'antispam[]']) == -1) {
-                data[value.name] = value.value;
-            }
-            if (value.name == 'images[]') {
-                if (!data['images']) {
-                    data['images'] = [];
-                }
-                data['images'].push(value.value);
-            }
-        });
-
-
-
-
-
-        this.widgetObject.save(data, 1); // save and reload widget
+    var save = function (e, response) {
+        this.widgetObject.save(response.data, 1); // save and reload widget
         var $popup = $('#ipWidgetSkeletonPopup .ipsModal');
-        $popup.modal('hide');
+        $popup.remove();
     };
 
 };

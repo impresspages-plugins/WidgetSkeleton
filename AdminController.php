@@ -16,43 +16,94 @@ namespace Plugin\WidgetSkeleton;
 
 class AdminController
 {
-    public function widgetPopupForm()
+
+    public function widgetPopupHtml()
     {
         $widgetId = ipRequest()->getQuery('widgetId');
-
         $widgetRecord = \Ip\Internal\Content\Model::getWidgetRecord($widgetId);
         $widgetData = $widgetRecord['data'];
 
+        $form = $this->managementForm($widgetData);
+
+        //Render form and popup HTML
+        $viewData = array(
+            'form' => $form
+        );
+        $popupHtml = ipView('view/editPopup.php', $viewData)->render();
+        $data = array(
+            'popup' => $popupHtml
+        );
+        //Return rendered widget management popup HTML in JSON format
+        return new \Ip\Response\Json($data);
+    }
+
+
+    /**
+     * Check widget's posted data and return data to be stored
+     */
+    public function checkForm()
+    {
+        $data = ipRequest()->getPost();
+        $form = $this->managementForm();
+        $data = $form->filterValues($data); //filter post data to remove any non form specific items
+        $errors = $form->validate($data);
+        if ($errors) {
+            //error
+            $data = array (
+                'status' => 'error',
+                'errors' => $errors
+            );
+        } else {
+            //success
+            unset($data['aa']);
+            unset($data['securityToken']);
+            unset($data['antispam']);
+            $data = array (
+                'status' => 'ok',
+                'data' => $data
+
+            );
+        }
+        return new \Ip\Response\Json($data);
+    }
+
+    protected function managementForm($widgetData = array())
+    {
         $form = new \Ip\Form();
 
         $form->setEnvironment(\Ip\Form::ENVIRONMENT_ADMIN);
 
-
-        $form->addField(new \Ip\Form\Field\Text(
-                array(
-                    'name' => 'title',
-                    'label' => 'Title',
-                    'value' => empty($widgetData['title']) ? null : $widgetData['title']
-                )
+        //setting hidden input field so that this form would be submitted to 'errorCheck' method of this controller. (http://www.impresspages.org/docs/controller)
+        $field = new \Ip\Form\Field\Hidden(
+            array(
+                'name' => 'aa',
+                'value' => 'WidgetSkeleton.checkForm'
             )
         );
+        $form->addField($field);
 
-        $form->addField(new \Ip\Form\Field\Textarea(
-                array(
-                    'name' => 'text',
-                    'label' => 'Text',
-                    'value' => empty($widgetData['text']) ? null : $widgetData['text']
-                )
+        //Input fields to adjust widget settings
+
+        $field = new \Ip\Form\Field\Text(
+            array(
+                'name' => 'title',
+                'label' => 'Title',
+                'value' => empty($widgetData['title']) ? null : $widgetData['title']
             )
         );
+        $field->addValidator('Required');
+        $form->addField($field);
 
-
-        $popup = ipView('view/editPopup.php', array('form' => $form))->render();
-        $data = array(
-            'popup' => $popup
+        $field = new \Ip\Form\Field\Textarea(
+            array(
+                'name' => 'text',
+                'label' => 'Text',
+                'value' => empty($widgetData['text']) ? null : $widgetData['text']
+            )
         );
-        return new \Ip\Response\Json($data);
+        $form->addField($field);
 
+        return $form;
     }
 
 
